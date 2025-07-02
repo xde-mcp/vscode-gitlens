@@ -17,6 +17,7 @@ export interface MarkdownContentMetadata {
 		name: GlCommands;
 		args?: Record<string, unknown>;
 	};
+	feedbackContext?: Record<string, unknown>;
 }
 
 export class MarkdownContentProvider implements TextDocumentContentProvider {

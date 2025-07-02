@@ -17,6 +17,7 @@ import { command, executeCommand } from '../system/-webview/command';
 import { showMarkdownPreview } from '../system/-webview/markdown';
 import { Logger } from '../system/logger';
 import { escapeMarkdownCodeBlocks } from '../system/markdown';
+import type { AIFeedbackContext } from './aiFeedback';
 import { GlCommandBase } from './commandBase';
 import type { CommandContext } from './commandContext';
 import {
@@ -349,8 +350,25 @@ export async function generateRebase(
 		// Extract the diff information from the reorganized commits
 		const diffInfo = extractRebaseDiffInfo(result.commits, result.diff, result.hunkMap);
 
+		// Create feedback context for telemetry
+		const feedbackContext: AIFeedbackContext = {
+			feature: 'generateRebase',
+			model: {
+				id: result.model.id,
+				providerId: result.model.provider.id,
+				providerName: result.model.provider.name,
+			},
+			usage: result.usage,
+			outputLength: result.content?.length,
+		};
+
 		// Generate the markdown content that shows each commit and its diffs
-		const { content, metadata } = generateRebaseMarkdown(result, title);
+		const { content, metadata } = generateRebaseMarkdown(
+			result,
+			title,
+			feedbackContext,
+			container.telemetry.enabled,
+		);
 
 		let generateType: 'commits' | 'rebase' = 'rebase';
 		let headRefSlug = head.ref;
@@ -522,14 +540,21 @@ export function extractRebaseDiffInfo(
 function generateRebaseMarkdown(
 	result: AIRebaseResult,
 	title = 'Rebase Commits',
+	feedbackContext?: AIFeedbackContext,
+	telemetryEnabled?: boolean,
 ): { content: string; metadata: MarkdownContentMetadata } {
-	const metadata = {
+	const metadata: MarkdownContentMetadata = {
 		header: {
 			title: title,
 			aiModel: result.model.name,
 			subtitle: 'Explanation',
 		},
 	};
+
+	// Add feedback context and commands to toolbar if telemetry is enabled
+	if (feedbackContext && telemetryEnabled) {
+		metadata.feedbackContext = feedbackContext as unknown as Record<string, unknown>;
+	}
 
 	let markdown = '';
 	if (result.commits.length === 0) {
@@ -598,6 +623,13 @@ function generateRebaseMarkdown(
 
 	markdown += explanations;
 	markdown += changes;
+
+	// Add feedback note if context is provided and telemetry is enabled
+	if (feedbackContext && telemetryEnabled) {
+		markdown += '\n\n---\n\n## Feedback\n\n';
+		markdown += 'Use the 👍 and 👎 buttons in the editor toolbar to provide feedback on this AI response.\n\n';
+		markdown += '*Your feedback helps us improve our AI features.*';
+	}
 
 	// markdown += `\n\n----\n\n## Raw commits\n\n\`\`\`${escapeMarkdownCodeBlocks(JSON.stringify(commits))}\`\`\``;
 	// markdown += `\n\n----\n\n## Original Diff\n\n\`\`\`${escapeMarkdownCodeBlocks(originalDiff)}\`\`\`\n`;

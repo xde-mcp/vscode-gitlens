@@ -8,6 +8,7 @@ import { GitUri } from '../git/gitUri';
 import type { AIExplainSource, AISummarizeResult } from '../plus/ai/aiProviderService';
 import { getBestRepositoryOrShowPicker } from '../quickpicks/repositoryPicker';
 import { showMarkdownPreview } from '../system/-webview/markdown';
+import type { AIFeedbackContext } from './aiFeedback';
 import { GlCommandBase } from './commandBase';
 import { getCommandUri } from './commandBase.utils';
 
