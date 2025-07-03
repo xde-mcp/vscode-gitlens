@@ -547,8 +547,8 @@ function generateRebaseMarkdown(
 		},
 	};
 
-	// Add feedback context and commands to toolbar if telemetry is enabled
-	if (feedbackContext && telemetryEnabled) {
+	// Always store feedback context if available, but only show UI when telemetry is enabled
+	if (feedbackContext) {
 		metadata.feedbackContext = feedbackContext as unknown as Record<string, unknown>;
 	}
 

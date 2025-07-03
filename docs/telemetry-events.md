@@ -145,16 +145,10 @@
 
 ```typescript
 {
-  // Request duration if available
-  'duration': number,
   // The AI feature that feedback was submitted for
-  'feature': 'explain' | 'generateCommit' | 'generateRebase' | 'generateStash' | 'generateDraft' | 'generateChangelog' | 'generateCreatePullRequest',
+  'feature': string,
   // Type of feedback provided
   'feedbackType': 'preset' | 'writeIn' | 'both',
-  // Whether write-in feedback was provided
-  'hasWriteInFeedback': boolean,
-  // Input/output lengths if available
-  'input.length': number,
   // Model information
   'model.id': string,
   'model.provider.id': 'anthropic' | 'azure' | 'deepseek' | 'gemini' | 'github' | 'gitkraken' | 'huggingface' | 'mistral' | 'ollama' | 'openai' | 'openaicompatible' | 'openrouter' | 'vscode' | 'xai',
@@ -165,11 +159,15 @@
   // The original rating that led to this feedback
   'rating': 'positive' | 'negative',
   'usage.completionTokens': number,
+  'usage.limits.limit': number,
+  'usage.limits.resetsOn': string,
+  'usage.limits.used': number,
   // Token usage information if available
   'usage.promptTokens': number,
   'usage.totalTokens': number,
   // Length of write-in feedback if provided
-  'writeInFeedback.length': number
+  'writeInFeedback.length': number,
+  'writeInFeedback.text': string
 }
 ```
 
