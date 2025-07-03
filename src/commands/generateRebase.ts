@@ -361,14 +361,10 @@ export async function generateRebase(
 			usage: result.usage,
 			outputLength: result.content?.length,
 		};
+		const telemetryEnabled = container.telemetry.enabled;
 
 		// Generate the markdown content that shows each commit and its diffs
-		const { content, metadata } = generateRebaseMarkdown(
-			result,
-			title,
-			feedbackContext,
-			container.telemetry.enabled,
-		);
+		const { content, metadata } = generateRebaseMarkdown(result, title, telemetryEnabled, feedbackContext);
 
 		let generateType: 'commits' | 'rebase' = 'rebase';
 		let headRefSlug = head.ref;
@@ -540,8 +536,8 @@ export function extractRebaseDiffInfo(
 function generateRebaseMarkdown(
 	result: AIRebaseResult,
 	title = 'Rebase Commits',
+	telemetryEnabled: boolean,
 	feedbackContext?: AIFeedbackContext,
-	telemetryEnabled?: boolean,
 ): { content: string; metadata: MarkdownContentMetadata } {
 	const metadata: MarkdownContentMetadata = {
 		header: {
@@ -560,7 +556,10 @@ function generateRebaseMarkdown(
 	if (result.commits.length === 0) {
 		markdown = 'No Commits Generated';
 
-		return { content: `${getMarkdownHeaderContent(metadata)}\n\n${markdown}`, metadata: metadata };
+		return {
+			content: `${getMarkdownHeaderContent(metadata, telemetryEnabled)}\n\n${markdown}`,
+			metadata: metadata,
+		};
 	}
 	const { commits, diff: originalDiff, hunkMap } = result;
 
@@ -624,17 +623,10 @@ function generateRebaseMarkdown(
 	markdown += explanations;
 	markdown += changes;
 
-	// Add feedback note if context is provided and telemetry is enabled
-	if (feedbackContext && telemetryEnabled) {
-		markdown += '\n\n---\n\n## Feedback\n\n';
-		markdown += 'Use the 👍 and 👎 buttons in the editor toolbar to provide feedback on this AI response.\n\n';
-		markdown += '*Your feedback helps us improve our AI features.*';
-	}
-
 	// markdown += `\n\n----\n\n## Raw commits\n\n\`\`\`${escapeMarkdownCodeBlocks(JSON.stringify(commits))}\`\`\``;
 	// markdown += `\n\n----\n\n## Original Diff\n\n\`\`\`${escapeMarkdownCodeBlocks(originalDiff)}\`\`\`\n`;
 
-	return { content: `${getMarkdownHeaderContent(metadata)}\n\n${markdown}`, metadata: metadata };
+	return { content: `${getMarkdownHeaderContent(metadata, telemetryEnabled)}\n\n${markdown}`, metadata: metadata };
 }
 
 /**

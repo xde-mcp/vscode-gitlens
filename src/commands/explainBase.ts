@@ -56,7 +56,8 @@ export abstract class ExplainCommandBase extends GlCommandBase {
 	}
 
 	protected openDocument(result: AISummarizeResult, path: string, metadata: MarkdownContentMetadata): void {
-		const content = `${getMarkdownHeaderContent(metadata)}\n\n${result.parsed.summary}\n\n${result.parsed.body}`;
+		const headerContent = getMarkdownHeaderContent(metadata, this.container.telemetry.enabled);
+		const content = `${headerContent}\n\n${result.parsed.summary}\n\n${result.parsed.body}`;
 
 		const documentUri = this.container.markdown.openDocument(content, path, metadata.header.title, metadata);
 
